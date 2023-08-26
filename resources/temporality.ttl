@@ -1,0 +1,334 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix ont: <http://rdf.naturallexicon.org/ontology#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix schema: <http://schema.org/>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix natlex: <http://rdf.naturallexicon.org/terms#> .
+@prefix validation: <http://rdf.naturallexicon.org/validation#> .
+@prefix inference: <http://rdf.naturallexicon.org/inference#> .
+@base <http://rdf.naturallexicon.org/terms> .
+
+@prefix : <#> .
+
+ont:Temporality
+    a owl:Ontology ;
+    owl:imports <http://www.w3.org/1999/02/22-rdf-syntax-ns#>;
+    owl:imports ont:Top ;
+    owl:import ont:Characterization ;
+    dc:description "Descriptions of time and changes of state." ;
+ .
+
+[
+        a owl:AllDisjointClasses ;
+        owl:members (natlex:State natlex:DynamicRelationship) ;
+]
+.
+
+
+## STATE
+
+:CharacterizedState a rdfs:Class;
+    rdfs:label "characterized state"@en;
+    rdfs:subClassOf :CharacterizedClass ;
+    dc:description "Extends to a class of states exhibiting certain characteristics."@en ;
+.
+
+:atTime a owl:ObjectProperty;
+    rdfs:subPropertyOf natlex:atAbstractLocation ;
+    rdfs:label "at time"@en;
+    rdfs:domain natlex:State;
+    rdfs:range :Moment;
+    dc:description "Asserts the moment associated with some state."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+## TEMPORAL SPACE
+:TemporalSpace a rdfs:Class;
+    rdfs:label "temporal space"@en;
+    rdfs:subClassOf natlex:AbstractSpace ;
+    dc:description "An abstract space within which entities are located and tracked in time."@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:AbsoluteTime a :TemporalSpace ;
+    rdfs:label "absolute time" ;
+    dc:description "The default temporal space in which all moments may be located." ;
+.
+
+## ABSTRACT SPATIAL ELEMENT / TEMPORAL ELEMENT
+
+:TemporalElement a rdfs:Class;
+    rdfs:label "temporal element"@en;
+    rdfs:subClassOf natlex:AbstractSpatialElement ;
+    dc:description "Something located and tracked in a temporal space."@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:inTemporalSpace a rdf:Property;
+    rdfs:subPropertyOf natlex:inAbstractSpace ;
+    rdfs:label "in temporal space"@en;
+    rdfs:domain :TemporalElement;
+    rdfs:range :TemporalSpace;
+    dc:description "Asserts a temporal space in which some spatial element is located and tracked."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+## ABSTRACT REGION / TIME SPAN
+
+:TimeSpan a rdfs:Class;
+    rdfs:label "time span"@en;
+    rdfs:subClassOf natlex:AbstractRegion ;
+    dc:description "A region in temporal space."@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+## ABSTRACT LOCATION / MAGNITUDE / DURATION
+
+:Duration a rdfs:Class;
+    rdfs:label "duration"@en;
+    rdfs:subClassOf natlex:Magnitude ;
+    dc:description "The length of a time span"@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+xsd:duration rdfs:subClassOf :Duration .
+
+## ABSTRACT LOCATION / MOMENT
+:Moment a rdfs:Class;
+    rdfs:label "moment"@en;
+    rdfs:subClassOf natlex:AbstractLocation ;
+    rdfs:subClassOf :TemporalElement ;
+    dc:description "An abstract location in temporal space."@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+## ABSTRACT PATH / STATE TRANSITION
+:StateTransition a rdfs:Class;
+    rdfs:label "state transition"@en;
+    rdfs:subClassOf natlex:BoundedAbstractPath ;
+    rdfs:subClassOf :TemporalElement ;
+    dc:description "A path along which a state changes."@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+## RELATIONSHIP / DYNAMIC RELATIONSHIP
+:DynamicRelationship a rdfs:Class;
+    rdfs:label "dynamic relationship"@en;
+    rdfs:subClassOf natlex:Relationship ;
+    rdfs:subClassOf :TemporalElement ;
+    dc:description "A relationship involving a plurality of non-concurrent states."@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:startTime
+    rdfs:subPropertyOf natlex:atAbstractLocation ;
+    rdfs:label "start time"@en;
+    rdfs:domain :DynamicRelationship;
+    rdfs:range :Moment;
+    owl:propertyChainAxiom (:hasInitialState :atTime) ;
+    dc:description "Asserts the moment at which some dynamic relationship started."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:endTime
+    rdfs:subPropertyOf natlex:atAbstractLocation ;
+    rdfs:label "end time"@en;
+    rdfs:domain :DynamicRelationship;
+    rdfs:range :Moment;
+    owl:propertyChainAxiom (:hasFinalState :atTime) ;
+    dc:description "Asserts the moment at which some dynamic relationship ended."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+## RELATIONSHIP/ DYNAMIC RELATIONSHIP / EVENT
+:Event
+    rdfs:subClassOf :DynamicRelationship ;
+    rdfs:label "event"@en;
+    dc:description "A relationship involving a state transition."@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:hasAgent
+    rdfs:subPropertyOf natlex:hasParticipant ;
+    rdfs:label "has agent"@en;
+    rdfs:domain :Event;
+    rdfs:range :Agent;
+    dc:description "Asserts an agent who acted on some patient in an event"@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:hasPatient a rdf:Property;
+    rdfs:subPropertyOf natlex:hasParticipant ;
+    rdfs:label "has patient"@en;
+    rdfs:domain :Event;
+    dc:description "Asserts that "@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:hasStateTransition a rdf:Property;
+    rdfs:subPropertyOf natlex:hasParticipant ;
+    rdfs:label "has state transition"@en;
+    rdfs:domain :Event;
+    rdfs:range :StateTransition;
+    dc:description "Asserts a state transition associated with some event."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:hasInitialState a rdf:Property;
+    rdfs:subPropertyOf natlex:hasParticipant ;
+    rdfs:label "has intial state"@en;
+    rdfs:domain :Event;
+    rdfs:range natlex:State ;
+    owl:propertyChainAxiom (:hasStateTransition natlex:fromSource) ;
+    dc:description "Asserts a state associated with the start of some event."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:hasFinalState
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:label "has final state"@en;
+    rdfs:domain :Event;
+    rdfs:range natlex:State ;
+    owl:propertyChainAxiom (:hasStateTransition natlex:toTarget) ;
+    dc:description "Asserts a final state associated with some event."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:finalStateOf owl:inverseOf :hasFinalState ;
+    rdfs:subPropertyOf :participantIn ;
+    rdfs:label "final state of " ;
+    dc:description  "asserts the event of which some state is the final state." ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+# :CharacterizedEvent a rdfs:Class;
+#     rdfs:label "event intension"@en;
+#     rdfs:subClassOf :CharacterizedClass ;
+#     dc:description "Extends to a class of relations exhibiting certain characteristics."@en ;
+#     rdfs:isDefinedBy ont:Temporality ;
+# .
+
+:isCharacteristicEventOf a owl:ObjectProperty ;
+    rdfs:subPropertyOf :isCharacteristicOf ;
+    rdfs:label "isCharacteristicEventOf"@en;
+    rdfs:domain :Event;
+    rdfs:range :Process;
+    dc:description "Asserts a process of which some class of events is characteristic. For example the event of checking out a book is characteristic of the process of running a library."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:hasCharacteristicFinalState a owl:ObjectProperty ;
+    rdfs:subPropertyOf :hasCharacteristic ;
+    rdfs:label "has characteristic final state"@en;
+    owl:equivalentProperty [:characterizesProperty :hasFinalState] ;
+    rdfs:domain :Event;
+    rdfs:range :State;
+    dc:description "Asserts a class of states typical of the final state of some class of events."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+
+inference:EventRules
+    a sh:NodeShape ;
+    sh:targetClass :Event;
+    sh:description "Rules applicable to events" ;
+    sh:rule inference:FinalStateAtTimeFromEvent ;
+.
+
+inference:FinalStateAtTimeFromEvent
+    a sh:SPARQLRule ;
+    dc:description "Infer 'at time' for a final state from 'end time' of the event" ;
+    sh:prefixes ont:Top ;
+    sh:construct """
+CONSTRUCT
+{
+  ?state natlex:atTime ?time.
+}
+WHERE
+{
+  BIND ($this AS ?event)
+  ?event
+    natlex:hasFinalState ?state;
+    natlex:endTime ?time;
+  .
+  FILTER NOT EXISTS
+  {
+    ?state natlex:atTime ?_time .
+  }
+
+}
+""" ;
+.
+
+
+#  RELATIONSHIP/ DYNAMIC RELATIONSHIP / PROCESS
+:Process a rdfs:Class;
+    rdfs:label "process"@en;
+    rdfs:subClassOf :DynamicRelationship ;
+    dc:description "A collection of sub-events. Often descibable in terms of transitions between classes of states or inter-connected classes of sub-events."@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:CharacterizedProcess a rdfs:Class;
+    rdfs:label "process intension"@en;
+    rdfs:subClassOf :CharacterizedClass ;
+    dc:description "Extends to subclasses of Process exhibiting certain characterisict states and events."@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:hasCharacteristicState
+    rdfs:subPropertyOf :hasCharacteristic ;
+    ## rdfs:label "hasCharacteristicState"@en;
+    # owl:inverseOf :isCharacteristicStateOf ;
+    rdfs:domain :Process ;
+    rdfs:range :State ;
+    #E dc:description "Asserts a class of state characterisict of some class of processes."@en ;
+.
+:hasCharacteristicState a owl:ObjectProperty;
+    rdfs:label "has characteristic state"@en;
+    ## rdfs:domain :Process;
+    rdfs:comment "Range to be validated as natlex:State" ;
+    dc:description "Asserts a class of states that characterizes a process."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+
+:isCharacteristicStateOf a owl:ObjectProperty ;
+    rdfs:subPropertyOf :isCharacteristicOf ;
+    rdfs:label "is characteristic state of"@en;
+    rdfs:domain :CharacterizedState;
+    rdfs:range :CharacterizedProcess ;
+    dc:description "Asserts a class of processes of which some class of states is characteristic."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:hasCharacteristicEvent a owl:ObjectProperty ;
+    rdfs:subPropertyOf :hasCharacteristic ;
+    rdfs:label "has characteristic event"@en;
+    rdfs:domain :Process;
+    rdfs:range :Event;
+    dc:description "Asserts a class of events characterisic of some class of processes."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+:hasSubEvent a rdf:Property;
+    rdfs:subPropertyOf :integrates ;
+    rdfs:label "has sub-event"@en;
+    rdfs:domain :Process;
+    rdfs:range :Event;
+    dc:description "Asserts an event taking place as part of a process."@en;
+    rdfs:isDefinedBy ont:Temporality ;
+.
+
+
+# ENTITY / AGENT
+
+:Agent a rdfs:Class;
+    rdfs:label "agent"@en;
+    rdfs:subClassOf natlex:Entity ;
+    dc:description "A entity capable to acting on patients in some event. This may be a person, but may also be say a chemical agent."@en ;
+    rdfs:isDefinedBy ont:Temporality ;
+.

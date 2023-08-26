@@ -1,0 +1,54 @@
+{
+ :paths ["src" "resources"]
+ :mvn/repos {"jitpack.io" {:url "https://jitpack.io"}} ;; for ontapi, below
+ :deps {
+        com.yetanalytics/flint {:mvn/version "0.2.1"
+                                :exclusions [org.clojure/clojure
+                                             org.clojure/clojurescript]}
+         org.clojure/clojure {:mvn/version "1.11.1"}
+         org.slf4j/slf4j-simple {:mvn/version "2.0.7"}
+         ont-app/rdf {:mvn/version "0.3.2"}
+         ont-app/igraph-jena {:local/root "../igraph-jena"} #_{:mvn/version "0.3.1"
+                                                               :exclusions [org.clojure/clojurescript]
+                                                               }
+        ont-app/sparql-client {:mvn/version "0.2.2"
+                               :exclusions [com.fzakaria/slf4j-timbre
+                                            ;; ... kills multiple SLF4J providers warning
+                                            ]
+                               
+                               }
+        org.apache.jena/jena-fuseki-main {:mvn/version "4.9.0"}
+        ont-app/vocabulary {:local/root "../vocabulary"} #_{:mvn/version "0.4.2"}
+        ;; com.github.galigator.openllet/openllet-owlapi {:mvn/version "2.6.5"}
+        ;; com.github.galigator.openllet/openllet-jena {:mvn/version "2.6.5"}
+        org.topbraid/shacl {:mvn/version "1.4.2"}
+         }
+ :aliases {
+           ;;;;;;;;;;;;;;;;
+           ;; JVM SUPPORT
+           ;;;;;;;;;;;;;;;;
+           :dev {:extra-paths ["test/resources"]}
+           ;; Informs :build alias, below
+           :test {
+                  :extra-paths ["test"]
+                  :extra-deps {
+                               org.clojure/test.check {:mvn/version "1.1.1"}
+                               io.github.cognitect-labs/test-runner {:git/tag "v0.5.1"
+                                                                     :git/sha "dfb30dd"}
+                               }
+                  }
+           ;; Building utilities
+           ;; invoke with -T:build
+           ;; for help: clojure -A:deps -T:build help/doc
+           :build {
+                   :deps {
+                          io.github.seancorfield/build-clj {:git/tag "v0.9.2" 
+                                                            :git/sha "9c9f078"
+                                                            }
+                          org.clojure/tools.deps {:mvn/version "0.18.1335"}
+                          }
+                   :ns-default build
+                   }
+
+           } ;; aliases
+ }

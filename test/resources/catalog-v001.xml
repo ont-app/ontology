@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <group id="Folder Repository, directory=, recursive=true, Auto-Update=true, version=2" prefer="public" xml:base=""/>
+  <uri id="natlex" name="http://rdf.naturallexicon.org/ontology#Top"
+       uri="../../resources/natural-lexicon.ttl"/>
+
+  <uri id="nlx-characterize" name="http://rdf.naturallexicon.org/ontology#Characterization"
+       uri="../../resources/characterization.ttl"/>
+
+  <uri id="nlx-mod" name="http://rdf.naturallexicon.org/ontology#Modality"
+       uri="../../resources/modality.ttl"/>
+
+  <uri id="nlx-tmp" name="http://rdf.naturallexicon.org/ontology#Temporality"
+       uri="../../resources/temporality.ttl"/>
+
+  <uri id="nlx-sig" name="http://rdf.naturallexicon.org/ontology#Significance"
+       uri="../../resources/significance.ttl"/>
+
+  <uri id="nlx-intent" name="http://rdf.naturallexicon.org/ontology#Intentionality"
+       uri="../../resources/intentionality.ttl"/>
+
+  <uri id="nlx-all" name="http://rdf.naturallexicon.org/ontology#All"
+       uri="../../resources/all.ttl"/>
+
+  <uri id="library" name="http://rdf.naturallexicon.org/ontology#LibraryDemo"
+       uri="library.ttl"/>
+</catalog>

@@ -1,0 +1,787 @@
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix inference: <http://rdf.naturallexicon.org/inference#> .
+@prefix natlex: <http://rdf.naturallexicon.org/terms#> .
+@prefix ont: <http://rdf.naturallexicon.org/ontology#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix schema: <http://schema.org/>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+@prefix validation: <http://rdf.naturallexicon.org/validation#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+@base <http://example.com/library> .
+
+@prefix : <#> .
+@prefix eg: <urn:eg:library:>.
+
+ont:LibraryDemo
+    a owl:Ontology ;
+    owl:imports ont:All ;
+    dc:description """
+This is a demo ontology to illustrate how the various layers of this ontology can describe a domain of knowledge, in this case a simple lending library.
+""" ;
+.
+
+ont:LibraryDemo
+    rdfs:comment """SHACL:
+Validation -- and Inferencing beyond OWL 1-- is supported through with SHACL. There are prefixes declared for all the usual suspects.
+""" ;
+    sh:declare [
+        sh:prefix "library" ;
+        sh:namespace "http://example.com/library#"^^xsd:anyURI ;
+    ] ;
+.
+
+## Link to Wikidata
+
+ont:LibraryDemo rdfs:comment """GENERAL - LINK TO WIKIDATA:
+We bring in a link to Wikidata to leverage its store of public knowledge, especially about books.
+"""
+.
+
+:wikidata a rdf:Property;
+    rdfs:subPropertyOf skos:closeMatch ;
+    rdfs:label "Wikidata item"@en;
+    rdfs:domain rdf:Resource ;
+    rdfs:range :WikidataItem ;
+    dc:description "Asserts a Wikidata resource that closely matches something described here."@en;
+.
+
+:WikidataItem a rdfs:Class;
+    rdfs:label "Wikidata item"@en;
+    rdfs:subClassOf owl:Thing ;
+    dc:description "A resource described in Wikidata."@en ;
+.
+
+## Libraries
+
+ont:LibraryDemo rdfs:comment """ENTITIES - LIBRARIES:
+We define a toy 'Library' class, with an instance 'MyLocalLibrary'.
+""" ;
+.
+
+:Library
+    rdfs:subClassOf natlex:Entity ;
+    rdfs:label "library"@en ;
+    dc:description "A lending library" ;
+    :wikidata wd:Q779419 ;
+.
+
+:hasManagementProcess a owl:ObjectProperty;
+    rdfs:label "has management process"@en;
+    rdfs:subPropertyOf natlex:participantIn ;
+    rdfs:domain :Library ;
+    rdfs:range natlex:Process ;
+    dc:description "Asserts the process entailing each event running a library."@en;
+.
+eg:MyLocalLibrary
+    a :Library ;
+    rdfs:label "my local library"@en ;
+.
+
+
+## Patrons
+
+ont:LibraryDemo rdfs:comment """ENTITIES - PATRONS:
+Libraries have Patrons, who are People whom libraries enroll and to whom volumes are checked in and out. Each patron has a 'patron id', and should also be uniquely identifiable by their name and phone number. We will use vCard vocabulary to describe the usual people details. None of the layers of this ontology has an actual Person class so far, so we'll define one here locally.
+
+Here's an example instance of a patron:
+
+eg:Eric a :Person ;
+    vcard:hasName "Eric" ;
+    :phoneNumber "555-0123"^^:Phone ;
+    :patronOf :MyLocalLibrary ;
+    :patronId 12345 ;
+.
+""" ;
+.
+
+:Person a rdfs:Class;
+    rdfs:label "person"@en;
+    rdfs:subClassOf natlex:Entity ;
+    dc:description "Extends to each individual person."@en ;
+.
+
+:Patron rdfs:subClassOf :Person ;
+  rdfs:label "patron";
+  dc:description "Extends to each indivdual patron of some actual library.";
+.
+
+:patronId a owl:InverseFunctionalProperty;
+    a owl:DatatypeProperty ;
+    rdfs:subPropertyOf dc:identifier;
+    rdfs:label "patron ID";
+    rdfs:range xsd:integer ;
+    dc:description "Uniquely identifies a patron. The number on their library card.";
+.
+
+:patronOf
+    rdfs:label "patron of"@en ;
+    rdfs:subPropertyOf natlex:partOf ;
+    dc:description "Asserts a library of which some person is a patron."@en ;
+.
+
+:phoneNumber a owl:DatatypeProperty ;
+    rdfs:label "phone number" ;
+    rdfs:range :Phone ;
+    dc:description "Asserts a phone number for some person." ;
+.
+
+:Phone a rdfs:Datatype ;
+    rdfs:subClassOf rdfs:Literal ;
+    rdfs:label "phone" ;
+    dc:description "Extends to each literal interpretable as a phone number." ;
+.
+
+## Written works and volumes
+
+ont:LibraryDemo rdfs:comment """ENTITIES - WRITTEN WORKS AND VOLUMES:
+There is a distinction to be made between Written Works themselves and individual volumes of those works. They are associated by the inverse relations ofWork/isVolumeOf. For illustration, we can break out a Novel genre of Written Work.
+
+We introduce a datatype for 'shelf address' to indcate the home of any given volume. Note that there is a distinction to be made between the 'shelf location' concept and the 'shelf address' literal that names the location.
+
+
+Here are example volumes:
+
+eg:fiction:steinbeck:east_of_eden
+    a :Novel ;
+    dc:title "East of Eden"@en ;
+    dc:creator eg:author:Steinbeck;
+    :wikidata wd:Q849701;
+    owl:sameAs <https://www.worldcat.org/title/1290802346>;
+.
+
+eg:author:Steinbeck
+    a :Person ;
+    vcard:hasName "John Steinbeck";
+    :wikidata wd:Q39212 ;
+.
+
+eg:fiction:steinbeck:east_of_eden:volume:1
+    :volumeOf eg:fiction:steinbeck:east_of_eden ;
+    :hasShelfLocation eg:fiction:steinbeck:east_of_eden:volume:1:shelfLocation;
+.
+
+eg:fiction:steinbeck:east_of_eden:volume:1:shelfLocation
+  :shelfAddress "fiction|steinbeck john|east of eden|v 1"^^:ShelfAddress;
+.
+""" .
+
+
+:WrittenWork
+    rdfs:subClassOf natlex:Entity;
+    rdfs:label "written work"@en;
+    dc:description "Extends to the content of a specific literary title like a specific English translation of War and Peace."@en;
+    :wikidata wd:Q47461344;
+.
+
+:hasAuthor a owl:ObjectProperty;
+    rdfs:label "has author"@en;
+    rdfs:subPropertyOf dc:creator ;
+    rdfs:domain :WrittenWork ;
+    rdfs:range :Person ;
+    dc:description "Asserts the person who authored some written work."@en;
+.
+
+:Volume
+  rdfs:subClassOf natlex:Entity;
+  rdfs:subClassOf natlex:Sign;
+  rdfs:label "volume"@en;
+  dc:description "Extends to each individual volume containing some written work.";
+.
+
+:ofWork
+  rdfs:subPropertyOf natlex:signifies;
+  rdfs:domain :Volume;
+  rdfs:range :WrittenWork;
+  dc:description "Asserts a literary work of which some volume is a copy.";
+.
+
+:hasVolume owl:inverseOf :ofWork ;
+    rdfs:label "has volume" ;
+    dc:description "Asserts one of the volumes containing some written work." ;
+.
+
+:hasShelfLocation a rdf:Property;
+    rdfs:label "has preferred shelf location"@en;
+    rdfs:range :ShelfAddress ;
+    dc:description "Asserts the correct shelf location of a given volume in a library."@en;
+.
+
+:ShelfLocation a rdfs:Class;
+    rdfs:label "shelf location"@en;
+    rdfs:subClassOf natlex:AbstractLocation ;
+    dc:description "Extends to each actual location of some volume in the shelves of some library, describable with a shelf address literal."@en ;
+.
+
+:inLibrary a rdf:Property;
+    rdfs:subPropertyOf natlex:inAbstractRegion ;
+    rdfs:label "in library"@en;
+    rdfs:domain :ShelfLocation;
+    rdfs:range :Library ;
+    dc:description "Asserts the library as the container for shelf locations"@en;
+.
+
+:SpaceOfVolumeLocations a rdfs:Class;
+    rdfs:label "space of shelf locations"@en;
+    rdfs:subClassOf natlex:AbstractSpace ;
+    dc:description "Extends to a specific abstract space relative to some library, locations within which correspond to where a volume is or may be at some point in time. Typically this is at a shelf location, with a patron, or in the shelving area. "@en ;
+    rdfs:comment "May be left implicit depending on your modeling needs." ;
+.
+
+:shelfAddress a owl:DatatypeProperty ;
+    rdfs:label "shelf address"@en;
+    rdfs:domain :ShelfLocation;
+    rdfs:range :ShelfAddress ;
+    dc:description "Asserts the address literal identifying some shelf location."@en;
+.
+
+:ShelfAddress a rdfs:Datatype ;
+    rdfs:subClassOf rdf:Literal ;
+    rdfs:subClassOf natlex:Sign ;
+    rdfs:label "shelf address"@en ;
+    dc:description "Extends to each expression indicating the preferred location of a volume in the shelving system of a library."@en ;
+.
+
+:Novel a rdfs:Class;
+    rdfs:label "novel"@en;
+    rdfs:subClassOf :WrittenWork ;
+    dc:description "Extends to each invividual written work (as content) classifiable as a novel."@en ;
+    :wikidata wd:Q8261 ;
+.
+
+
+##################
+## Relationships
+###################
+
+## THEMATIC ROLES
+
+ont:LibraryDemo rdfs:comment """RELATIONSHIPS - THEMATIC ROLES:
+Typcially the events we're modeling use the library as the observing agent, with either patients or volmes as thematic roles. We can identify as local roles:
+
+- 'acting library'
+- 'affected patron',
+- 'affected volume'
+- 'from patron'
+- 'to patron'
+
+... in the domain of 'event' with corresponding respective ranges.
+""" .
+
+:actingLibrary a rdf:Property;
+    rdfs:label "acting library"@en;
+    rdfs:subPropertyOf natlex:hasAgent ;
+    rdfs:domain natlex:Event ;
+    rdfs:range :Library ;
+    dc:description "Asserts the library performing some action. "@en;
+.
+
+:affectedPatron a rdf:Property;
+    rdfs:subPropertyOf natlex:hasPatient ;
+    rdfs:subPropertyOf natlex:hasTheme ;
+    rdfs:label "affected patron"@en;
+    rdfs:domain natlex:Event ;
+    rdfs:range :Patron ;
+    dc:description "Asserts the patron affected by some action."@en;
+.
+
+:affectedVolume a rdf:Property;
+    rdfs:subPropertyOf natlex:hasPatient ;
+    rdfs:subPropertyOf natlex:hasTheme ;
+    rdfs:label "affected volume"@en;
+    rdfs:domain natlex:Event ;
+    rdfs:range :Volume ;
+    dc:description "Asserts the volume affected by some action."@en;
+.
+
+:fromPatron a rdf:Property;
+    rdfs:subPropertyOf natlex:fromSource ;
+    rdfs:label "from patient"@en;
+    rdfs:domain natlex:Event ;
+    rdfs:range :Patron ;
+    dc:description "Asserts the patient from which some theme is the source in some event."@en;
+.
+
+:toPatron a rdf:Property;
+    rdfs:subPropertyOf natlex:toTarget ;
+    rdfs:label "to patron"@en;
+    rdfs:domain natlex:Event;
+    rdfs:range :Patron ;
+    dc:description "Asserts the patron to which some theme is the target in some event."@en;
+.
+
+
+ont:LibraryDemo rdfs:comment """RELATIONSHIPS - LIBRARY OBSERVATIONS:
+A lot of our modeling involves observations from the point of view of some library, so there is a class of LibraryObservations, where the `by library` relation identifies the observer. Primary figures may be 'of patron' or 'of volume' as appropriate.
+""" .
+
+:LibraryObservation a rdfs:Class;
+    rdfs:label "library observation"@en;
+    rdfs:subClassOf natlex:Observation ;
+    dc:description "Extends to each observation made by some library."@en ;
+.
+
+:byLibrary a rdf:Property;
+    rdfs:label "by library"@en;
+    rdfs:subPropertyOf natlex:byObserver ;
+    rdfs:domain :LibraryObservation ;
+    rdfs:range :Library ;
+    dc:description "Asserts the library serving as observer in some observation."@en;
+.
+
+:ofPatron a rdf:Property;
+    rdfs:subPropertyOf natlex:ofPrimaryFigure ;
+    rdfs:label "of patron"@en;
+    rdfs:domain :LibraryObservation ;
+    rdfs:range :Patron ;
+    dc:description "Asserts the patron serving as primpary figure in some observation made by some library."@en;
+.
+
+:ofVolume a rdf:Property;
+    rdfs:subPropertyOf natlex:ofPrimaryFigure ;
+    rdfs:label "of volume"@en;
+    rdfs:domain :LibraryObservation ;
+    rdfs:range :Volume ;
+    dc:description "Asserts the volume serving as the primary figure in some observation ade by some library."@en;
+.
+## RUNNING A LIBRARY
+ont:LibraryDemo rdfs:comment """RELATIONSHIPS - RUNNING A LIBRARY:
+We identify a class of processes called 'running a library', whose sub-events affect the states of some specific library.
+""" .
+
+:RunningALibrary a rdfs:Class;
+    rdfs:subClassOf natlex:Process ;
+    rdfs:label "running a library"@en;
+    dc:description "Extends to any actual set of sub-events affecting the state of some library."@en ;
+.
+
+## Mangaging enrollment
+
+ont:LibraryDemo rdfs:comment """RELATIONSHIPS - MANAGING ENROLLMENT:
+One part of running a library involves tracking the enrollment status of each patron. We identify a class of events called 'to change enrollment status'. Each enrollment status is modeled as a quality within an (implicit) abstract space of patron enrollment relative to some library. These can be 'enrolled' or 'not enrolled', though this could be expanded on.
+""" .
+
+:RunningALibrary natlex:hasCharacteristicState :EnrollmentState .
+
+:ToChangeEnrollmentStatus a rdfs:Class;
+    rdfs:label "to change enrollment status"@en;
+    rdfs:subClassOf natlex:Event ;
+    natlex:hasCharacteristicFinalState :EnrollmentState ;
+    dc:description "Extends to individual events where some library enrolls, dis-enrolls, or otherwise changes the enrollment status of a patron."@en ;
+.
+
+:EnrollmentState a rdfs:Class;
+    rdfs:label "patron has been enrolled"@en;
+    rdfs:subClassOf natlex:State ;
+    rdfs:subClassOf :LibraryObservation ;
+    dc:description "Extends to invividual states reflecting the enrollment status of some patron of some library."@en ;
+    rdfs:comment "Modeled as an observation by the library whose primary figure is the patron, qualified as 'enrolled', relative the library as secondary figure." ;
+.
+
+:hasEnrollmentStatus a rdf:Property;
+    rdfs:subPropertyOf natlex:qualifiedAs ;
+    rdfs:label "enrollment status"@en;
+    rdfs:domain :EnrollmentState;
+    rdfs:range :EnrollmentStatus ;
+    dc:description "Asserts the enrollment quality of some patron."@en;
+.
+
+## enrollment qualities
+
+:EnrollmentStatus a rdfs:Class;
+    rdfs:label "enrollment status"@en;
+    rdfs:subClassOf natlex:Quality ;
+    dc:description "Extends to specific resources naming a quality of enrollment status"@en ;
+.
+
+:Enrolled a :EnrollmentStatus ;
+    rdfs:label "enrolled" ;
+    dc:description "The quality of a patron being enrolled in some library." ;
+.
+
+:NotEnrolled a :EnrollmentStatus ;
+    rdfs:label "not enrolled" ;
+    dc:description "The quality of a patron not being enrolled." ;
+.
+
+
+## Managing checkout state
+
+ont:LibraryDemo rdfs:comment """RELATIONSHIPS - MANAGING CHECKOUT STATUS:
+For any given library we also want to track the checkout status of each volume. We model this with events 'to change checkout status', whose agent is the libray, whose patient/theme is the individual volume. Changing checkout status also implies a change of location to either a patron in the cases of chacking out, or the shelving section of the library when checking in.
+
+Checkout status is modeled as a quality within the (implicit) abstract space of checkeouts relative to each library. Status at minumum would be 'checked out' and 'checked in', but we might also add things like 'on hold'.
+
+Volume location is modeled as a location within the abstract space of book locations, which may be the shelf address of the volume (when shelved), the patron (when checked out), and 'shelving' (just after being checked in).
+""" .
+
+:RunningALibrary  natlex:hasCharacteristicState :CheckoutStatus .
+
+:CheckoutState a rdfs:Class;
+    rdfs:label "book checkout status"@en;
+    rdfs:subClassOf natlex:State ;
+    rdfs:subClassOf :LibraryObservation ;
+    dc:description "Extends to a case where a specific book has been checked out, or has been returned"@en ;
+    rdfs:comment "An observation whose primary figure is of a specific volume, being qualified as checked out or checked in, with a specific library as secondary figure." ;
+.
+
+:checkoutStatus a rdf:Property;
+    rdfs:subPropertyOf natlex:qualifiedAs ;
+    rdfs:label "checkout status"@en;
+    rdfs:domain :CheckoutState ;
+    rdfs:range natlex:Quality ;
+    dc:description "Asserts the checkout status observed for a specific volume in some observation."@en;
+.
+
+:CheckoutSpace a rdfs:Class;
+    rdfs:label "checkout space"@en;
+    rdfs:subClassOf natlex:AbstractSpace ;
+    dc:description "Extends to each space relative to some library which tracks the checkout status of its individual volumes."@en ;
+.
+
+:CheckoutStatus a rdfs:Class;
+    rdfs:label "checkout status"@en;
+    rdfs:subClassOf natlex:Quality ;
+    rdfs:subClassOf [
+        owl:onProperty natlex:inAbstractSpace ;
+        owl:allValuesFrom :CheckoutSpace ;
+    ] ;
+    dc:description "Extends to each named quality in some space of checkout statuses wrt some library."@en ;
+.
+
+:CheckedOut a :CheckoutStatus ;
+    rdfs:label"checked out"@en ;
+    dc:description "Names the status of a book being checked out." ;
+.
+
+:VolumeIsCheckedOut a rdfs:Class;
+    rdfs:label "volume is checked out"@en;
+    rdfs:subClassOf :CheckoutState ;
+    rdfs:subClassOf [
+        owl:onProperty :checkoutStatus ;
+        owl:hasValue :CheckedOut ;
+    ] ;
+    dc:description "Extends to each state where some volume is checked out to some patron."@en ;
+.
+
+:VolumeIsCheckedIn a rdfs:Class;
+    rdfs:label "volume is checked in"@en;
+    rdfs:subClassOf :CheckoutState ;
+    rdfs:subClassOf [
+        owl:onProperty :checkoutStatus ;
+        owl:hasValue :CheckedIn ;
+    ] ;
+    dc:description "Extends to each state where some volume is checked in to some patron."@en ;
+.
+
+:CheckedIn a :CheckoutStatus ;
+    rdfs:lable"checked in"@en ;
+    dc:description "Names the status of a book being checked in." ;
+.
+
+:ToChangeCheckoutStatus a rdfs:Class;
+    rdfs:label "to change checkout status"@en;
+    rdfs:subClassOf natlex:Event ;
+    natlex:hasCharacteristicFinalState :CheckoutState ;
+    dc:description "A specific event of checking out some volume in or out of some library."@en ;
+.
+
+:toCheckoutStatus a owl:ObjectProperty;
+    rdfs:label "to checkout status"@en;
+    rdfs:subPropertyOf natlex:toTarget ;
+    rdfs:domain :ToChangeCheckoutStatus ;
+    rdfs:range :CheckoutStatus ;
+    dc:description "Asserts the checkout status to which some volume is being changed."@en;
+.
+
+
+inference:ToChangeCheckoutStatusRules
+    a sh:NodeShape ;
+    sh:targetClass :ToChangeCheckoutStatus ;
+    sh:description "Rules for 'to change checkout status'" ;
+    sh:rule inference:CheckoutStateFromToChangeCheckoutStatus ;
+.
+
+inference:CheckoutStateFromToChangeCheckoutStatus
+    a sh:SPARQLRule ;
+    sh:description "Infer the checkout state from 'to change checkout status' event" ;
+    sh:prefixes ont:Top, ont:LibraryDemo ;
+    sh:construct """
+CONSTRUCT
+{
+  ?state a library:CheckoutState;
+    library:byLibrary ?library;
+    library:ofVolume ?volume;
+    library:hasCheckoutStatus ?checkoutStatus;
+  .
+  ?event natlex:hasFinalState ?state;
+  .
+}
+WHERE
+{
+  BIND ($this AS ?event)
+  FILTER NOT EXISTS
+  {
+    ?event natlex:hasFinalState [a natlex:CheckoutState].
+  }
+  BIND (URI (CONCAT (STR (?event), ':finalState:CheckoutStatus')) AS ?state)
+  ?event
+    library:actingLibrary ?library;
+    library:affectedVolume ?volume;
+    library:toCheckoutStatus ?checkoutStatus;
+  .
+}
+""" ;
+.
+
+ont:LibraryDemo rdfs:comment """RELATIONSHIPS - MANAGING VOLUME LOCATION:
+For any given library we also want to track the  location of each volume. We model this with the following events:
+ - 'to change checkout status', whose agent is the libary, and whose patient/theme is the individual volume. Checking a book out implies a change of location from its previous location to the patron to 'shelving' within the library.
+ - 'to shelve volume' implies that a volume moves from 'shelving' to its 'shelf locaton'.
+
+Checking a book in implies a Checkout status is modeled as a quality within the (implicit) abstract space of volume locations relative to each library. Status can be the volume index of the volume if it is shelved, 'unshelved', or any person entrusted with the volume.
+""" .
+
+:RunningALibrary natlex:hasCharacteristicState :VolumeIsLocated .
+
+:ToChangeVolumeLocation a rdfs:Class;
+    rdfs:label "to change volume location"@en;
+    rdfs:subClassOf natlex:Event ;
+    natlex:hasCharacteristicFinalState :VolumeIsLocated ;
+    dc:description "Extends to an event which changes the location state of some volume."@en ;
+.
+
+:toVolumeLocation a owl:ObjectProperty;
+    rdfs:label "to volume location"@en;
+    rdfs:subPropertyOf natlex:toTarget ;
+    rdfs:domain :ToChangeVolumeLocation ;
+    rdfs:range :VolumeLocation ;
+    dc:description "Asserts the location in the space of volume locations to which a volume has been moved."@en;
+.
+
+inference:ToChangeVolumeLocationRules
+    a sh:NodeShape ;
+    sh:targetClass :ToChangeVolumeLocation ;
+    sh:rule inference:VolumeIsLocatedFromToChangeVolumeLocation ;
+.
+
+inference:VolumeIsLocatedFromToChangeVolumeLocation
+    sh:description "Infer final state is VolumeIsLocated from instance of 'to change volume location'" ;
+    a sh:SPARQLRule ;
+    sh:prefixes ont:Top, ont:LibraryDemo ;
+    natlex:generatedBy "ont-app.ontology.core-test/volume-is-located-from-change-volume-location"^^natlex:ClassPath ;
+    sh:construct """
+CONSTRUCT
+{
+  ?toChangeVolumeLocation
+    natlex:hasFinalState ?volumeIsLocated;
+  .
+  ?volumeIsLocated a library:VolumeIsLocated;
+    library:byLibrary ?library;
+    library:ofVolume ?volume;
+    library:atVolumeLocation ?location;
+  .
+}
+WHERE
+{
+  BIND ($this AS ?toChangeVolumeLocation)
+  FILTER NOT EXISTS
+  {
+    ?toChangeVolumeLocation natlex:hasFinalState [a library:VolumeIsLocated].
+  }
+  Bind (URI (CONCAT (STR (?toChangeVolumeLocation), ':finalState:AtVolumeLocation'))
+      AS ?volumeIsLocated)
+  ?toChangeVolumeLocation
+    library:actingLibrary ?library;
+    library:affectedVolume ?volume;
+    library:toVolumeLocation ?location;
+  .
+}
+""" ;
+.
+
+:VolumeIsLocated a rdfs:Class;
+    rdfs:label "book is located"@en;
+    rdfs:subClassOf natlex:State  ;
+    rdfs:subClassOf :LibraryObservation ;
+    dc:description "Extends to each state where a volume is located in the system by the library. "@en ;
+.
+
+:VolumeLocation a rdfs:Class;
+    rdfs:label "volume location"@en;
+    rdfs:subClassOf natlex:AbstractLocation ;
+    dc:description "Extends to each location of some volume in the space of volume locations for some library."@en ;
+.
+
+:atVolumeLocation a rdf:Property;
+    rdfs:subPropertyOf natlex:atAbstractLocation ;
+    rdfs:label "located at"@en;
+    rdfs:domain :VolumeIsLocated ;
+    rdfs:range :VolumeLocation ;
+    dc:description "Asserts the location of some volume observed by the library system. "@en;
+.
+
+:ToCheckOutVolume a rdfs:Class;
+    rdfs:label "to check out volume"@en;
+    rdfs:subClassOf :ToChangeCheckoutStatus ;
+    rdfs:subClassOf :ToChangeVolumeLocation ;
+    rdfs:subClassOf [
+        owl:onProperty :toCheckoutStatus ;
+        owl:hasValue :CheckedOut ;
+    ] ;
+    dc:description "Extends to each specific event where a library checks out some volume to some patron."@en ;
+.
+
+:ToCheckInVolume a rdfs:Class;
+    rdfs:label "to check out volume"@en;
+    rdfs:subClassOf :ToChangeCheckoutStatus ;
+    rdfs:subClassOf :ToChangeVolumeLocation ;
+    rdfs:subClassOf [
+        owl:onProperty :toCheckoutStatus ;
+        owl:hasValue :CheckedIn ;
+
+    ] ;
+    rdfs:subClassOf [
+        owl:onProperty :toVolumeLocation ;
+        owl:hasValue :InShelving ;
+    ] ;
+
+    dc:description "Extends to specific events where library checks in some volume from some patron."@en ;
+.
+
+:ToIngestVolume a rdfs:Class;
+    rdfs:label "to ingest volume"@en;
+    rdfs:subClassOf :ToChangeVolumeLocation ;
+    dc:description "Extends to individual events wherein some library brings a volume of some work into its collection."@en ;
+    rdfs:comment "Places the volume in shelving as checked in." ;
+.
+
+:ToShelveVolume a rdfs:Class;
+    rdfs:label "to shelve volume"@en;
+    rdfs:subClassOf :ToChangeVolumeLocation ;
+    dc:description "Extends to each event where some volume is moved to its place in the shelves."@en ;
+.
+
+ont:LibraryDemo rdfs:comment """INTENTIONS - A TOY TASK ANALYSIS FOR A LIBRARY CATALOG WEBSITE:
+To demonstrate the _intentionality_ layer, we can describe what a website allowing users to browse the library catalog might look like (without actually writing the website!).
+
+We do this by describing the intentions that the user might have in using this catalog, and associating those intentions with various constructs integral to the website. For the most part these intentions will be _knowledge goals_, so we can use an abstract space to model what a person knows or doesn't know. There are various things one does when using a website, such as reviewing a list of descriptions, selecting from a list, specifying a query, etc, each of which can be characterized in terms of user intentions. 
+""" ;
+.
+
+:OnlineLibraryCatalog a rdfs:Class;
+    rdfs:label "online library catalog"@en;
+    rdfs:subClassOf natlex:Entity ;
+    natlex:hasTypicalPurpose :UserKnowsContentsOfLibraryCatalog ;
+    dc:description "Extends to each online website allowing someone to browse a library catalog."@en ;
+.
+
+:KnowledgeSpace a rdfs:Class;
+    rdfs:label "knowledge space"@en;
+    rdfs:subClassOf natlex:AbstractSpace ;
+    rdfs:subClassOf [
+        owl:onProperty natlex:relativeTo ;
+        owl:allValuesFrom :Person ;
+    ] ;
+    dc:description "Extends to each space of things knowable by some 'knower'. Regions in this space can be broadly separated into 'known', 'unknown'. Other regions in this space will be the concepts referred to by descriptions, often formulated as queries of one kind or another. Events of 'learning' involve state transitions from 'unknown' to 'known'. Locations in this space are instances in the extension of concepts located in these regions."@en ;
+.
+
+:KnowledgeQuality a rdfs:Class;
+    rdfs:label "knowledge quality"@en;
+    rdfs:subClassOf natlex:Quality ;
+    rdfs:subClassOf [
+        owl:onProperty natlex:inAbstractSpace ;
+        owl:allValuesFrom :KnowledgeSpace ;
+    ] ;
+    dc:description "Extends to :Known and :Unknown."@en ;
+.
+
+:Known
+    a :KnowledgeQuality ;
+    rdfs:label "known"@en;
+    dc:description "extends to each 'known' region of some knower's knowledge space."@en ;
+.
+
+:Unknown
+    a :KnowledgeQuality ;
+    rdfs:label "unknown"@en;
+
+    dc:description "Extends to each 'unknown' region in some knower's knowledge space."@en ;
+.
+
+:KnowingContentsOfLibraryCatalog a rdfs:Class;
+    rdfs:label "user knows contents of library"@en;
+    rdfs:subClassOf natlex:KnowledgeState ;
+    rdfs:subClassOf [
+        owl:onProperty :ofKnowlege ;
+        owl:allValuesFrom [
+            rdfs:subClassOf [
+                owl:onProperty :describedBy ;
+                owl:allValuesFrom :CatalogDescription ;
+            ] ;
+        ] ;
+    ] ;
+    rdfs:subClassOf [
+        owl:onProperty natlex:qualifiedAs ;
+        owl:hasValue :Known ;
+    ] ;
+    dc:description "Extends to each state where some person knows something describable by adescription pertaining to the contents of the library"@en ;
+.
+
+:KnowledgeState a rdfs:Class;
+    rdfs:label "knowledge state"@en;
+    rdfs:subClassOf natlex:State ;
+    rdfs:subClassOf [
+        owl:onProperty natlex:qualifiedAs ;
+        owl:allValuesFrom :KnowledgeQuality ;
+    ] ;
+    dc:description "Extends to each state wherin some knower knows something."@en ;
+    rdfs:comment "This is modeled as an instance of something qualified in the knower's knowledge state as 'Known'." ;
+.
+:knownBy a owl:ObjectProperty;
+    rdfs:label "known by"@en;
+    rdfs:subPropertyOf natlex:byObserver ;
+    rdfs:domain :KnowledgeState;
+    rdfs:range :Person ;
+    dc:description "Asserts the knower of some knowledge."@en;
+.
+
+:ofKnowlege a owl:ObjectProperty;
+    rdfs:label "of knowledge"@en;
+    rdfs:subPropertyOf natlex:withSecondaryFigure ;
+    rdfs:domain :KnowledgeState ;
+    rdfs:range natlex:CharacterizedClass ;
+    dc:description "Asserts the characterization of some knowledge knowable by some knower."@en;
+    rdfs:comment "This is modeled as a 'landmark' with respect to which the primary figure of the observation may correspond." ;
+.
+
+:CatalogDescription a rdfs:Class;
+    rdfs:label "catalog description"@en;
+    rdfs:subClassOf natlex:Description ;
+    dc:description "Extends to each description of the contents of the catalog of some library."@en ;
+    rdfs:comment "Examples would include a query for books by a specific author, matching a topic, recipients of the Booker Prize, etc." ;
+.
+
+:BooksByAuthor a rdfs:Class;
+    rdfs:label "books by author"@en;
+    rdfs:subClassOf :CatalogDescription ;
+    :describableBy [
+        a :SparqlTemplate ;
+        :hasSparqlTemplate """
+Select D
+Where
+{
+  ?work a library:WrittenWork;
+    library:hasAuthor {{author}};
+
+}
+""" ;
+    ] ;
+    dc:description "Extends to each individual description of books by a particular author"@en ;
+.

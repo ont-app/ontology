@@ -1,0 +1,248 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix natlex: <http://rdf.naturallexicon.org/terms#> .
+@prefix ont: <http://rdf.naturallexicon.org/ontology#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix schema: <http://schema.org/>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+
+
+@base <http://rdf.naturallexicon.org/terms> .
+
+@prefix : <#> .
+
+
+ont:Significance
+    a owl:Ontology ;
+    owl:imports ont:Top ;
+    dc:description "Vocabulary to describe signs and the things they signify." ;
+    rdfs:comment "This includes an abstract space dedicated to mappings, paths within which link sign to referent." ;
+.
+
+## Entity / Sign
+
+:Sign a rdfs:Class;
+    rdfs:label "sign"@en;
+    rdfs:subClassOf :Entity ;
+    rdfs:subClassOf :AbstractLocation ;
+    rdfs:subClassOf :MappingElement ;
+    dc:description "Something from which some interpreting agent may infer significance. Extends to a specific element in the source space of some Mapping, serving as the basis for inferring a correspondence with some referent in the target space of the same Mapping."@en ;
+    rdfs:comment "Examples would include symbols, street signs, individual words, whole statements in natural language, documents, and computer programs." ;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+## Entity / Interpreting Agent
+
+:InterpretingAgent a rdfs:Class;
+    rdfs:label "intepreting agent"@en;
+    rdfs:subClassOf :ObservingAgent ;
+    dc:description "Extends to an entity capable of interpreting signs in the source space of some Mapping."@en ;
+    rdfs:comment "Examples would include a person conversant in some language or a compiler for some computer language." ;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+:interpreterFor a rdf:Property;
+    rdfs:label "interpretor for"@en;
+    rdfs:domain :InterpretingAgent;
+    rdfs:range :SystemOfSigns;
+    dc:description "Asserts a system of signs some interpreting agent is conversant in"@en;
+    rdfs:comment "Examples would include the fact that some person is conversant in Bulgarian, or a Java Compiler can read Java version 17." ;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+## Entity / ... / Abstract Spatial Element / Reference Path
+
+:ReferencePath  a rdfs:Class;
+    rdfs:label "reference path"@en;
+    rdfs:subClassOf :BoundedAbstractPath;
+    rdfs:subClassOf :MappingElement ;
+    dc:description "A path within a Mapping from sign to referent"@en ;
+    rdfs:comment "Reifies a specific mapping from an element in the source space to an element in the target space." ;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+:fromSign a rdf:Property;
+    rdfs:subPropertyOf :fromSource ;
+    rdfs:label "from sign"@en;
+    rdfs:domain :ReferencePath;
+    rdfs:range :Sign;
+    dc:description "Asserts the sign in a reference path."@en;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+:toReferent a rdf:Property;
+    rdfs:label "to referent"@en;
+    rdfs:domain :ReferencePath;
+    dc:description "Asserts the abstract location in the target space of a mapping associated with the resource being referred to by the sign in a reference path."@en;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+:signifies a owl:ObjectProperty;
+    rdfs:label "signifies"@en;
+    owl:propertyChainAxiom (:fromSign :toReferent) ;
+    rdfs:domain :Sign ;
+    rdfs:range owl:Thing ;
+    dc:description "Asserts the thing referred to by some sign."@en;
+.
+
+:indicates a owl:ObjectProperty;
+    rdfs:label "indicates"@en;
+    rdfs:subPropertyOf :signifies ;
+    dc:description "Asserts a simple referent in the target space for some simple sign in the source space of some mapping."@en;
+.
+
+:describes a owl:ObjectProperty;
+    rdfs:label "describes"@en;
+    rdfs:subPropertyOf :signifies ;
+    rdfs:domain :Description ;
+    dc:description "Asserts a region in the target space of some mapping referred to by a complex sign in the source space, sufficient to narrow the search space of that space's interpreting agent."@en;
+.
+
+## ENTITY / SIGN / DESCRIPTION
+:Description a rdfs:Class;
+    rdfs:label "description"@en;
+    rdfs:subClassOf :Sign ;
+    dc:description "Extends to each complex sign details of which describe a range of possible referents in the target space of some mapping."@en ;
+.
+
+:specifies a owl:ObjectProperty;
+    rdfs:label "specifies"@en;
+    rdfs:subPropertyOf :describes ;
+    rdfs:domain :Specification;
+    rdfs:range <range>;
+    dc:description "Asserts something described by some specification in enough detail for an interpreting agent to identify a single referent."@en;
+.
+
+## ENTITY / SIGN / SPECIFICATION
+:Specification a rdfs:Class;
+    rdfs:label "specification"@en;
+    rdfs:subClassOf :Description ;
+    dc:description "Extends to each description narrow enough to identify a single referent to the interpreting agent in some mapping."@en ;
+.
+
+
+
+## Abstract Space / Mapping
+:Mapping a rdfs:Class;
+    rdfs:label "mapping"@en;
+    rdfs:subClassOf :AbstractSpace ;
+    dc:description "Extends to a specific abstract space, paths in which link signs in some source space to referents in a target space."@en ;
+    rdfs:comment "Examples would include some natural or artificial language, which map between symbols and descriptions of their meanings, or a hash table or other set of key/value pairs, which map between simple tokens and simple values." ;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+:fromSourceSpace a rdf:Property;
+    rdfs:subPropertyOf :integrates ;
+    rdfs:label "from source space"@en;
+    rdfs:domain :Mapping;
+    rdfs:range :AbstractSpace;
+    dc:description "Asserts an abstract space regions and locations within which correspond to signs."@en;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+:toTargetSpace a rdf:Property;
+    rdfs:subPropertyOf :integrates ;
+    rdfs:label "to target space"@en;
+    rdfs:domain :Mapping;
+    rdfs:range :AbstractSpace;
+    dc:description "Asserts an abstract space elements within which correspond to elements referred to by elements in the source space."@en;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+:hasReferencePath a rdf:Property;
+    rdfs:label "has reference path"@en;
+    rdfs:domain :Mapping;
+    rdfs:range :ReferencePath;
+    dc:description "Asserts an abstract path mapping between sign and referent."@en;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+
+## Abstract Space / Mapping / System of Signs
+
+:SystemOfSigns a rdfs:Class;
+    rdfs:label "system of signs"@en;
+    rdfs:subClassOf :Mapping ;
+    dc:description "A mapping characterized by systematic approach to constructing meanings, as with a language."@en ;
+    rdfs:comment "Examples would include the lexical constructions of some natural language, or Java v 17. It would probably not include a simple hash table. " ;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+
+:MappingElement a rdfs:Class;
+    rdfs:label "mapping element"@en;
+    rdfs:subClassOf :AbstractSpatialElement ;
+    rdfs:subClassOf [
+        owl:onProperty :inAbstractSpace ;
+        owl:someValuesFrom :Mapping ;
+    ] ;
+    dc:description "Extends to each element of some Mapping space."@en ;
+.
+
+## Relationship / Observation / Interpretation
+
+:Interpretation a rdfs:Class;
+    rdfs:label "to interpret"@en;
+    rdfs:subClassOf :Observation ;
+    dc:description "Extends to specific instances performed by some interpreting agent of some sign, instantiating some referent."@en ;
+    rdfs:comment "Examples would be reading a text, compiling a computer program, accessing a key in a hash table, invoking a command-line in a bash shell."@en ;
+    rdfs:comment "This is modeled as an impression formed by the interpreter when exposed to the sign, modeled as the stimulus. Subclasses of interpretation may break out details as figure/ground, with assessments of various aspects of the sign."@en ;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+:byInterpreter a rdf:Property;
+    rdfs:subPropertyOf :byObserver ;
+    rdfs:subPropertyOf :hasAgent ;
+    rdfs:label "by interpreter"@en;
+    rdfs:domain :Interpretation;
+    rdfs:range :InterpretingAgent;
+    dc:description "Asserts the interpreting agent involved in interpreting some sign"@en;
+    rdfs:comment "Examples would in include a running instance of a large language model to field prompts from a user,  or a running process invoking /usr/bin/java on your local machine to invoke a java program." ;
+
+    rdfs:isDefinedby ont:Significance ;
+.
+
+:ofSign a rdf:Property;
+    rdfs:subPropertyOf :fromStimulus ;
+    rdfs:label "of sign"@en;
+    rdfs:domain :Interpretation;
+    rdfs:range :Sign;
+    dc:description "Asserts a sign being interpreted by some interpreter."@en;
+    rdfs:comment "Examples would be the prompt provided by a user of a large langauge model, or a java program to be run." ;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+:interpretedAs a owl:ObjectProperty ;
+    rdfs:subPropertyOf :withImpression ;
+    rdfs:label "interpreted as"@en;
+    rdfs:domain :Interpretation;
+    dc:description "Asserts the referent for some sign in some interpretation."@en;
+    rdfs:comment "Examples would be a description of the state of a large language model after recieving a prompt, a descripton of a process running in response to a shell command, or a description of what a stop sign means." ;
+    rdfs:isDefinedby ont:Significance ;
+.
+
+
+:InformationResource a rdfs:Class;
+    rdfs:label "document"@en;
+    rdfs:subClassOf :Sign ;
+    dc:description "Extends to each actual artificact serving to refer to some content/information."@en ;
+.
+
+:Information a rdfs:Class;
+    rdfs:label "information"@en;
+    skos:altLabel "content"@en ;
+    rdfs:subClassOf :Entity ;
+    rdfs:subClassOf [
+        owl:onProperty :inSpace ;
+        owl:someValuesFrom [
+            owl:onProperty [owl:inverse :toTargetSpace] ;
+            owl:someValuesFrom :Mapping ;
+        ] ;
+    ] ;
+    ## [<mapping> toTargetSpace [integrates <information>]]
+    dc:description "Extends to each body of abstract content conveyed by some document."@en ;
+    rdfs:comment "Examples would include the contents of War and Peace, or the byte sequence described in a digital file." ;
+.
+

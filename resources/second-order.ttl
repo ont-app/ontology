@@ -1,0 +1,75 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix ont: <http://rdf.naturallexicon.org/ontology#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix schema: <http://schema.org/>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix natlex: <http://rdf.naturallexicon.org/terms#> .
+@prefix validation: <http://rdf.naturallexicon.org/validation#> .
+@prefix inference: <http://rdf.naturallexicon.org/inference#> .
+@base <http://rdf.naturallexicon.org/terms> .
+
+@prefix : <#> .
+
+ont:SecondOrder
+    a owl:Ontology ;
+    owl:imports <http://www.w3.org/1999/02/22-rdf-syntax-ns#>;
+    owl:imports ont:Top ;
+    dc:description "Descriptions 2nd-order relationships between classees and properties.. The underlying assumption here is that a class resource identifies the 'intension' of some concept, with instances of that class constituting elements of the 'extension' of that concept. As such, we can identify characteristics of that intension, but care must be taken to avoid 'punning', that is attribuing the same properties to the class as one assigns to its instances." ;
+.
+
+# [ a owl:AllDisjointClasses ;
+#         owl:members (owl:ObjectProperty :CharacterizingProperty) ;
+
+# ] .
+
+## CONCEPTUAL INTENSION
+
+:CharacterizedClass a rdfs:Class;
+    rdfs:label "characterized class"@en;
+    dc:description "Extends to classes rather than instances, and describes regularities common to that class. For example a given subclass of 'Process' might have a set of characteristic states which are more properly associated with that class of processes than any particular instantiation of that process. This is a '2nd-order' class."@en ;
+    rdfs:isDefinedBy ont:SecondOrder ;
+.
+
+
+:CharacterizingProperty rdfs:subClassOf owl:ObjectProperty ;
+    rdfs:label "characterizing property" ;
+    dc:description "Extends to properties that characterize a class" ;
+    rdfs:isDefinedBy ont:SecondOrder ;
+.
+
+:hasCharacteristic a owl:ObjectProperty ;
+    rdfs:domain :CharacterizedClass ;
+    rdfs:range :CharacterizedClass ;
+    dc:description "An abstract property whose sub-properties assert some some class of resource as characteristic of some characterized class. Example sup-property: hasCharacteristicState`." ;
+    rdfs:isDefinedBy ont:SecondOrder ;
+.
+
+:isCharacteristicOf a rdf:ObjectProperty ;
+    rdfs:range :CharacterizedClass ;
+    rdfs:isDefinedBy ont:SecondOrder ;
+    dc:description "An abstract property whose sub-properties assert some Characterized Class of some characterizing property. Example sub-property: :characteristicStateOf." ;
+    rdfs:isDefinedBy ont:SecondOrder ;
+.
+
+:characterizesProperty a rdf:Property ;
+    rdfs:label "characterizes property"@en;
+    rdfs:domain :CharacterizingProperty;
+    rdfs:range rdf:Property;
+    dc:description "Asserts a property in the domain of some characterized class being characterized by the intension of that class. E.g.  typicalNumberOfLegs for a speciies characterizes numberOfLegs found on an individual specimen."@en;
+    rdfs:isDefinedBy ont:SecondOrder ;
+.
+
+## VALIDATION CONSTRAINTS
+
+validation:CharacterizingPropertyDomainIsClass
+    sh:targetClass :CharacterizingProperty ;
+    sh:Property [
+        sh:path rdfs:domain ;
+        sh:hasClass rdfs:Class ;
+        sh:severity  sh:Violation ;
+        sh:message "Characterizing properties can only apply to classes." ;
+    ]
+.

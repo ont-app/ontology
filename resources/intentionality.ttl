@@ -1,0 +1,227 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix natlex: <http://rdf.naturallexicon.org/terms#> .
+@prefix ont: <http://rdf.naturallexicon.org/ontology#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix schema: <http://schema.org/>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+
+@base <http://rdf.naturallexicon.org/terms> .
+
+@prefix : <#> .
+
+
+ont:Intentionality
+    a owl:Ontology ;
+    owl:imports ont:Top, ont:Modality, ont:Significance ;
+    dc:description "Vocabulary to describe the intentions of intentional agents." ;
+    rdfs:comment "This includes an abstract space dedicated to intension, paths within which describe attraction and repulsion towards or away from various potentialities. This is the basis of discussing things like goals, plans and purposes." ;
+    rdfs:comment "Modality is important here, as many of the things we may plan for or against are potentially true rather than actually true. A plan would typically exist in the region known as Speculative or Potential, and the actual execution of that plan may be recorded and compared to the plan." ;
+.
+
+
+## Entity / Intentional Agent
+
+:IntentionalAgent a rdfs:Class;
+    rdfs:label "intentional agent"@en;
+    rdfs:subClassOf :ObservingAgent ;
+    dc:description "Extends to individual observers capable of seeking and avoiding various states and conditions."@en ;
+    rdfs:comment "Examples would include natural and artificial persons, and automated processes programmed behave as such." ;
+.
+
+## Entity / Abstract Spatial Element / Intentional Element
+
+:IntentionalElement a rdfs:Class;
+    rdfs:label "intentional element"@en;
+    rdfs:subClassOf :AbstractSpatialElement ;
+    rdfs:subClassOf [
+        owl:onProperty :inAbstractSpace ;
+        owl:someValuesFrom :IntentionalSpace ;
+    ] ;
+    dc:description "Extends to each element of a specific intentional space."@en ;
+.
+
+:hasPurpose a owl:ObjectProperty ;
+    rdfs:label "has purpose" ;
+    rdfs:domain :IntentionalElement;
+    rdfs:range :MotivationalPath ;
+    dc:description "Asserts that a specific operation, plan, etc, was used to acheive a specific intention." ;
+    owl:inverse :isPurposeOf ;
+.
+
+:hasTypicalPurpose a :CharacterizingProperty ;
+    rdfs:label "has typical purpose"@en;
+    :characterizesProperty :hasPurpose ;
+    dc:description "Characterizes a class of plan, operation etc as typically being used for some purpose."@en;
+    owl:inverse :typicalPurposeOf ;
+.
+
+## Entity / Intention
+:Intention a rdfs:Class;
+    rdfs:label "intention"@en;
+    rdfs:subClassOf :AbstractLocation ;
+    rdfs:subClassOf :IntentionalElement ;
+    dc:description "Extends to each specific goal or obstacle asserted in a specific space of intentions."@en ;
+    rdfs:comment "This may integrate several criteria." ;
+.
+
+:hasCriterion a owl:ObjectProperty;
+    rdfs:label "has criterion"@en;
+    rdfs:subPropertyOf natlex:integrates ;
+    rdfs:domain :Intention ;
+    rdfs:range :Criterion ;
+    dc:description "Asserts a criterion integral to some intention."@en;
+.
+
+:Criterion a rdfs:Class;
+    rdfs:label "criterion"@en;
+    rdfs:subClassOf :IntentionalElement ;
+    rdfs:subClassOf :Observation ;
+    dc:description "Extends to each observation integral to some intention."@en ;
+.
+
+## Entity / ... / Intention / Goal
+:Objective a rdfs:Class;
+    rdfs:label "goal"@en;
+    rdfs:subClassOf :Intention ;
+    dc:description "A location within a space of intentions toward which the intentional agent is attracted."@en ;
+.
+
+## Entity/ ... / Intention / Obstacle
+:Obstacle a rdfs:Class;
+    rdfs:label "obstacle"@en;
+    rdfs:subClassOf :Intention ;
+    dc:description "Extends to locations within actual spaces of intention away from which the intentional agent is repulsed."@en ;
+.
+
+## Entity / ... / Instrument
+:Instrument a rdfs:Class;
+    rdfs:label "instrument"@en;
+    rdfs:subClassOf :Entity ;
+    rdfs:subClassOf :IntentionalElement ;
+    dc:description "Extends to a specific entity used to perform some operation."@en ;
+.
+
+## Entity / ... / Means
+
+:Means a rdfs:Class;
+    rdfs:label "means"@en;
+    rdfs:subClassOf :Relationship ;
+    dc:description "Extends to a specific relationship that enables or encourages some intention."@en ;
+.
+
+
+## Abstract space / space of intentions
+:IntentionalSpace a rdfs:Class;
+    rdfs:label "space of intentions"@en;
+    rdfs:subClassOf :AbstractSpace ;
+    rdfs:subClassOf [
+        owl:onProperty :relativeTo ;
+        owl:allValuesFrom :IntentionalAgent ;
+    ] ;
+    dc:description "Extends to specific abstract spaces relative to some intentional agent, paths within which relfact that agent's desire to seek some states and avoid others. Locations in this space represent entities within the agent's purview toward which they may have a positive or negative affect. Qualities in this space would name various varieties of these affects."@en ;
+.
+
+## Spatial elements / .../ Abastract Path /Path of attraction
+:MotivationalPath a rdfs:Class;
+    rdfs:label "path of attraction"@en;
+    rdfs:subClassOf :Orientation ;
+    dc:description "A path within a space of intentions oriented toward some target, characterizing an attraction to that target."@en ;
+.
+
+:attractedTo a rdf:Property;
+    rdfs:label "attracted to"@en;
+    rdfs:domain :MotivationalPath;
+    rdfs:range :Objective;
+    dc:description "Asserts an objective toward which the intentional agent is motivated."@en;
+.
+
+:repulsedBy a rdf:Property;
+    rdfs:label "repulsed by"@en;
+    rdfs:domain :MotivationalPath;
+    rdfs:range :Obstacle;
+    dc:description "Asserts an obstacle away from which the intentional agent is motivated"@en;
+.
+## Spatial elements / ... / Intentional Quality
+:IntentionalQuality a rdfs:Class;
+    rdfs:label "intentional valence"@en;
+    rdfs:subClassOf :Quality ;
+    dc:description "Extends to values within the space of intentions qualifying the intentional agent's attitude toward some object located in that space."@en ;
+    rdfs:comment "Examples would be Good and Bad." ;
+.
+
+:isIntentionalOppositeOf a rdf:Property;
+    a owl:SymmetricProperty ;
+    rdfs:label "intentional opposite of"@en;
+    rdfs:domain :IntentionalQuality ;
+    rdfs:range :IntentionalQuality ;
+    dc:description "Asserts that some pair of intentional qualities are complementary opposites."@en;
+    rdfs:comment "Examples would include the fact that good is the opposite of bad." ;
+.
+
+# instances ...
+:Good a :IntentionalQuality ;
+    dc:description  "The quality of being attractive to the seeker in an intentional space" ;
+    :intentionalOppositeOf :Bad ;
+.
+
+:Bad a :IntentionalQuality ;
+    dc:description "The quality of being unattractive to the seeker in an intentional space." ;
+    :intentionalOppositeOf :Good ;
+.
+
+:IntentionalEquivalence a rdfs:Class;
+    rdfs:label "intentional equivalence"@en;
+    rdfs:subClassOf :State ;
+    dc:description "Extends to states where two different intentions are equivalent."@en ;
+    rdfs:comment "Examples would include the fact that seeking security is intentially equivalent to avoiding risk." ;
+.
+
+:Plan a rdfs:Class;
+    rdfs:label "plan"@en;
+    rdfs:subClassOf :IntentionalElement ;
+    rdfs:subClassOf :Process ;
+    dc:description "Extends to a specific plan formulated by or for some intentional agent in pursuit of one or more intentions. Being a process, it includes one or more sub-events (typically Operations) and may have characteristic states. Many elements of a plan will be located in the potentiality region of modality."@en ;
+.
+
+:Operation a rdfs:Class;
+    rdfs:label "operation"@en;
+    rdfs:subClassOf :IntentionalElement ;
+    rdfs:subClassOf :Event ;
+    dc:description "An event executed with some intention in mind, associated with a final state consistent with some intention."@en ;
+    rdfs:comment "Examples would include using a hammer to drive in a nail, flipping a switch to turn on a light." ;
+.
+
+:withInstrument a rdf:Property;
+    rdfs:label "with instrument"@en;
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:domain :Operation;
+    rdfs:range :Instrument ;
+    dc:description "Asserts an instrument used to perform some operation. "@en;
+.
+
+:conditionedOn a rdf:Property;
+    rdfs:label "conditioned on"@en;
+    rdfs:domain :Operation;
+    rdfs:range :IntentionalElement;
+    dc:description "Asserts some intentional element which is a precondition for execution of some operation."@en;
+    rdfs:comment "Examples would include the fact that to use a hammer to drive in a nail you must be in posession of a hammer, and a nail." ;
+.
+
+:enables owl:inverse :conditionedOn .
+
+
+:hinderedBy a rdf:Property;
+    rdfs:label "hindered by"@en;
+    rdfs:domain :Operation;
+    rdfs:range :IntentionalElement;
+    dc:description "Asserts a state which hinders execution of some operation."@en;
+    rdfs:comment "Examples include the fact that heavy weather makes it difficult to fly a plane." ;
+    rdfs:comment "It may often be the case that a hinderance is the inverse equivalent of some precondition." ;
+.
+
+
+:hinders owl:inverse :hinderedBy .
+
+

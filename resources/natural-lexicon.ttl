@@ -1,0 +1,612 @@
+
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix inference: <http://rdf.naturallexicon.org/inference#> .
+@prefix ont: <http://rdf.naturallexicon.org/ontology#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix schema: <http://schema.org/>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+
+@base <http://rdf.naturallexicon.org/terms> .
+
+@prefix natlex: <#> .
+@prefix : <#> .
+
+ont:Top
+    a owl:Ontology ;
+    owl:imports <http://www.w3.org/1999/02/22-rdf-syntax-ns#>;
+    dc:description "A simple top-level ontology" ;
+ .
+
+[ a owl:AllDisjointClasses ;
+        owl:members (:Entity :Relationship :AbstractSpace)
+] .
+
+ont:Top rdfs:comment """TOP-LEVEL PROPERTIES:
+
+There are two high-level properties to indicate abstract part/whole relationships. 'integrates' and its inverse 'integral to'.
+""" .
+
+:integrates a owl:ObjectProperty ;
+    rdfs:label "integrates"@en;
+    dc:description "Asserts some part or participant in some entity or relationship."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:integralTo a owl:ObjectProperty ;
+    owl:inverseOf :integrates ;
+    rdfs:label "integral into"@en ;
+    dc:description "Asserts some entity relationship or spatial entity into which something combines to form an integral whole." ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ABSTRACT SPACE
+
+ont:Top rdfs:comment """ABSTRACT SPACES:
+
+These are contexts within which entities and are located and tracked. Spatial metaphors are ubiquitous in natural language, and arguably in human cognition generally. Note for example prepositional phrases in English.
+
+Each space is defined relative to some entity which serves as the frame of reference for that space. Generally speaking:
+- regions in a space correspond to collections of individuals
+- locations in a space correspond to individual entities located in regions within that space
+- paths in a space extend from a 'source' to a 'target'
+- the role of 'theme' traces movement of some entity along a path in one or more spaces
+
+Other spatial elements may include 'magnitudes' measure using 'units of measure', and 'qualities' which name regions in a space which may be hard to quantify, but may be 'near' or 'far' from other qualities.
+
+There's a lot of latitude for domain-specificity of the operative spatial metaphor for any given space, e.g. there may be a space of 'posession' relative to property laws for some government where regions within that space correspond to the property of some individual and individual posessions are located within those regions.
+""" .
+
+
+:AbstractSpace a rdfs:Class;
+    rdfs:label "abstract space"@en;
+    # rdfs:subClassOf owl:Thing ;
+    dc:description "Extends to instances of a context construed in terms of a spatial metaphor relative to which entities may be located. Examples would be physical space or anything measurable, but may also include media for expressing subjective judgments."@en ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:relativeTo rdfs:subPropertyOf :integralTo ;
+    rdfs:label "relative to"@en;
+    owl:inverseOf :relativeBasisOf ;
+    rdfs:domain :AbstractSpace;
+    rdfs:range :Entity;
+    dc:description "Asserts the entity that serves as the frame of reference for some abstract space, for example the frame of reference for a digital address space is provided by its execution enviroment."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:abstractLocationOf a rdf:Property;
+    rdfs:subPropertyOf :integralTo ;
+    owl:inverseOf :atAbstractLocation ;
+    rdfs:label "located by"@en;
+    rdfs:domain :AbstractSpatialElement;
+    dc:description "Asserts some part of an abstract space that locates some spatial element. "@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ABSTRACT SPATIAL ELEMENT
+:AbstractSpatialElement a rdfs:Class ;
+    rdfs:label "abstract spatial element"@en ;
+    dc:description "Extends to instances of a resource defined in an abstract space." ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:inAbstractSpace a owl:ObjectProperty;
+    rdfs:subPropertyOf :integralTo ;
+    rdfs:label "in abstract space"@en;
+    rdfs:domain :AbstractSpatialElement;
+    rdfs:range :AbstractSpace;
+    dc:description "Asserts that some entity is located in some abstract space."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:atAbstractLocation a rdf:Property;
+    rdfs:subPropertyOf :integrates ;
+    rdfs:label "at abstract location"@en;
+    rdfs:domain :AbstractSpatialElement;
+    rdfs:range :AbstractLocation;
+    dc:description "Asserts the abstract location at which some entity is located and tracked."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:inAbstractRegion a rdf:Property;
+    rdfs:label "in abstract region"@en;
+    rdfs:domain :AbstractSpatialElement;
+    rdfs:range :AbstractRegion;
+    dc:description "Asserts an abstract region within which some entity is located and tracked."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ABSTRACT SPATIAL ELEMENT / ABSTRACT SPATIAL ENTITY / UNIT OF MEASURE
+:UnitOfMeasure a rdfs:Class;
+    rdfs:label "unit of measure"@en;
+    rdfs:subClassOf :AbstractSpatialElement ;
+    dc:description "Extends to instances of an entity expressing some way of measuring magnitude in an abstract space."@en ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ABSTRACT SPATIAL ELEMENT / ABSTRACT LOCATION
+:AbstractLocation a rdfs:Class;
+    rdfs:subClassOf :AbstractRegion ;
+    rdfs:label "abstract location"@en;
+    dc:description "Extends to instances of a tightly constrained region or point  in some abstract space."@en ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ABSTRACT SPATIAL ELEMENT / ABSTRACT LOCATION / MAGNITUDE
+
+## ABSTRACT SPATIAL ELEMENT / ABSTRACT LOCATION 
+:Magnitude a rdfs:Class;
+    rdfs:label "magnitude"@en;
+    rdfs:subClassOf :AbstractLocation ;
+    dc:description "Extends to instances of a location in some abstract space signifying magnitude or degree according to some unit of measure."@en ;
+    :rdfs:comment "Domain of :measuredIn and :scalarValue" ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:measuredIn a owl:ObjectProperty;
+    rdfs:label "measured in"@en;
+    rdfs:subPropertyOf :hasPart ;
+    rdfs:domain :Magnitude;
+    rdfs:range :UnitOfMeasure;
+    dc:description "Asserts that some magnitude in some space is denominated using some unit of measure pertinent to that space."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:scalarValue a owl:ObjectProperty;
+    rdfs:label "scalar value"@en;
+    rdfs:subPropertyOf :hasPart ;
+    rdfs:domain :Magnitude;
+    rdfs:range :ScalarValue ;
+    dc:description "Asserts that some magnitude in some space is expressed using a single number."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ABSTRACT SPATIAL ELEMENT / ABSTRACT PATH
+:AbstractPath
+    rdfs:subClassOf :AbstractSpatialElement ;
+    dc:description "Extends to instances of a trajectory along which a theme may be located during a transition in some abstract space" ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:Extent a rdfs:Class;
+    rdfs:label "extent"@en;
+    rdfs:subClassOf :BoundedAbstractPath ;
+    dc:description "An abstract path occupying some abstract space."@en ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:Orientation a rdfs:Class;
+    rdfs:label "orientation"@en;
+    rdfs:subClassOf :AbstractPath ;
+    dc:description "An abstract path pointing toward/away from something."@en ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:toward a rdf:Property;
+    rdfs:subPropertyOf :atAbstractLocation ;
+    rdfs:label "toward"@en;
+    rdfs:domain :Orientation ;
+    rdfs:range :AbstractSpatialElement;
+    dc:description "Asserts something that a path is oriented toward without necessarily being the target of the path."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:awayFrom a rdf:Property;
+    rdfs:subPropertyOf :atAbstractLocation ;
+    rdfs:label "away from"@en;
+    rdfs:domain :Orientation;
+    rdfs:range :AbstractSpatialElement ;
+    dc:description "Asserts something that a path is oriented away from without necessarily being the source of the path."@en;
+.
+
+## ABSTRACT SPATIAL ELEMENT / ABSTRACT PATH / BOUNDED ABSTRACT PATH
+:BoundedAbstractPath a rdfs:Class;
+    rdfs:label "bounded abstract path"@en;
+    rdfs:subClassOf :AbstractPath ;
+    dc:description "An abstract path bounded by its source and target."@en ;
+    rdfs:comment "Domain of :from and :to" ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:fromSource a owl:ObjectProperty ;
+    rdfs:subPropertyOf :atAbstractLocation ;
+    rdfs:domain :BoundedAbstractPath ;
+    rdfs:range :AbstractSpatialElement ;
+    dc:description "Asserts that some path starts at a 'location' equated with some thing" ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:toTarget a owl:ObjectProperty ;
+    rdfs:subPropertyOf :atAbstractLocation ;
+    rdfs:domain :BoundedAbstractPath ;
+    rdfs:range :AbstractSpatialElement ;
+    dc:description "Asserts that some path terminates at a 'location' equated with some thing." ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ABSTRACT SPATIAL ELEMENT / ABSTRACT REGION
+:AbstractRegion a rdfs:Class;
+    rdfs:label "abstract region"@en;
+    rdfs:subClassOf :AbstractSpatialElement ;
+    dc:description "A region within some abstract space."@en ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:containedBy a rdf:Property;
+    rdfs:subPropertyOf rdfs:subClassOf ;
+    rdfs:subPropertyOf :abstractLocationOf ;
+    rdfs:label "contained by "@en;
+    rdfs:domain :AbstractRegion;
+    rdfs:range :AbstractRegion;
+    dc:description "Asserts that some abstract region is wholly contained in some other region"@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:contains a rdf:Property;
+    rdfs:subPropertyOf :atAbstractLocation ;
+    owl:inverseOf :containedBy ;
+    rdfs:label "contains "@en;
+    rdfs:domain :AbstractRegion;
+    rdfs:range :AbstractRegion;
+    dc:description "Asserts that some abstract region is wholly contained in some other region"@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ABSTRACT SPATIAL ELEMENT / ABSTRACT REGION QUALITY
+
+:Quality a rdfs:Class;
+    rdfs:subClassOf :AbstractRegion ;
+    rdfs:label "quality"@en;
+    dc:description "A subjective assessment of something, in an abstract space  e.g. color. Often hard to define."@en ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ABSTRACT SPATIAL ELEMENT / SCALAR VALUE
+:ScalarValue a rdfs:Class;
+    rdfs:label "scalar value"@en;
+    rdfs:subClassOf :AbstractSpatialElement ;
+    dc:description "A single value measuring some magnitude. This may be a precise number or something more vague like 'very high'"@en ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ENTITY
+
+ont:Top rdfs:comment """ENTITIES:
+
+An entity is a thing construed as a single coherent object, typically expressed in natural language as a noun or noun phrase. It may be integral to a relationship as a participant. It may serve as the relative basis for an abstract space, be located within an abstract space as a theme, or serve as the source or target of a path. 
+""" .
+
+
+:Entity
+    # rdfs:subClassOf owl:Thing ;
+    dc:description "A thing construed as a single coherent entity, typically expressed in natural language as a noun phrase" ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:hasPart a owl:ObjectProperty;
+    rdfs:subPropertyOf :integrates ;
+    rdfs:label "has part"@en;
+    rdfs:domain :Entity;
+    rdfs:range :Entity;
+    dc:description "Asserts that some entity is partly composed of some other entity."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:partOf a owl:ObjectProperty ;
+    owl:inverseOf :hasPart ;
+    rdfs:subPropertyOf :integralTo ;
+    rdfs:label "part of"@en;
+    rdfs:domain :Entity ;
+    rdfs:range :Entity ;
+    dc:description "Asserts that some entity of state is part of some larger whole" ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:relativeBasisOf rdfs:subPropertyOf :integrates ;
+    rdfs:label "relative basis of"@en;
+    rdfs:domain :Entity;
+    rdfs:range :AbstractSpace;
+    owl:inverseOf :relativeTo ;
+    dc:description "Asserts that some entity defines or otherwise serves as a basis for an abstract space. E.g. the Earth would provide a frame of reference defining longitude/latitude. The NYSE might define the space of stock prices sold on that exchange."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## ENTITY / EXPERIENCER
+:ObservingAgent a rdfs:Class;
+    rdfs:label "observing agent"@en;
+    rdfs:subClassOf :Entity ;
+    dc:description "A person or instrument performing some Observation."@en ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## RELATIONSHIP
+
+ont:Top rdfs:comment """RELATIONSHIPS:
+
+A relationship is a basic primitive typically expressed by sentences or clauses in natural language, integrating several 'participant' entities into a pattern typically named by a verb.
+
+At the top-level there are two types of primitive relationships defined: 'states', which define static relationships between participants, and 'observations', which posit a subjective experience by some presumed observer of a situation.
+
+Properties in the range of relationships may be called 'roles', and when they range over entities, those entities are called 'participants'. When a role ranges over another relationship that relationship is called a 'complement'.
+""" .
+
+:Relationship
+    # rdfs:subClassOf owl:Thing ;
+    dc:description "Extends to instances of a an ensemble of related entities, typically expressedin natural language as a sentence or clause." ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:hasParticipant a rdf:Property;
+    rdfs:subPropertyOf :integrates ;
+    rdfs:label "has participant"@en;
+    rdfs:domain :Relationship;
+    dc:description "Asserts something that participates in some relationship"@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:participantIn
+    rdfs:subPropertyOf :integralTo ;
+    owl:inverseOf :hasParticipant ;
+    rdfs:label "participant in" ;
+    rdfs:range :Relationship ;
+    dc:description "Asserts a relationship in which something participates." ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:hasTheme a rdf:Property;
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:label "has theme"@en;
+    rdfs:domain :Relationship;
+    dc:description "Asserts something being located and tracked along one or more abstract paths in some relationship."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:entails a rdf:Property;
+    rdfs:subPropertyOf :integrates ;
+    rdfs:label "entails"@en;
+    rdfs:domain :Relationship;
+    rdfs:range :Relationship;
+    dc:description "Asserts a subordinate relationship in some larger relationship"@en;
+.
+
+:entailedBy a rdf:Property;
+    rdfs:subPropertyOf :integralTo ;
+    rdfs:label "entailed bye"@en;
+    rdfs:domain :Relationship;
+    rdfs:range :Relationship;
+    dc:description "Asserts that "@en;
+.
+
+## RELATIONSHIP / OBSERVATION
+
+ont:Top rdfs:comment """RELATIONSHIP -- OBSERVATIONS:
+
+One assumption we're making here is that ultimately any claim that can be made about the world can be described as an observation made by some (possibly implicit) observer. Our representation of an observication presumes a process that proceeds approximately as follows:
+
+- The observer is presented with some _stimulus_
+- Which leads to an _impression_
+- Upon which a _figure/ground_ relationship is imposed
+- Figures may be _primary figures_ ("trajctors") or _secondary figures_ ("landmarks")
+- Figures are classified, bringing the observer in touch with previous experiences of other instances of that class
+- Figures are _assessed_, (often_qualified_ or _quantified_) within some _scope_
+
+The description above implies a sequential process, but as I understand it, in actual cognition these are aspects of the perceptual process that coalesce in parallel as a coherent whole.
+
+Many of these elements may be implicit, but it's hard to imagine an observation that does not at least have a primary figure and some kind of classification and assessment. Indeed, the observation itself may often be left implicit for any particular relationship we want to assert. Nevertheless, we should bear in mind that such relationships
+should align with the process of observation described here.
+
+Note that not all observations are simple and immediate. We could represent the US Census of 2020 as a set of observations, quantifying the number of people living in a number of regions throughout the United States. We might represent each piece of documentation informing the census using sub-properties of `impression`, with the actual population estimates using sub-properties of `quantified as`.
+""" .
+
+:Observation a rdfs:Class;
+    rdfs:label "scan"@en;
+    rdfs:subClassOf :Relationship ;
+    dc:description "Extends to instances of an experiential relationship wherein some observer (or experiencer) observes some stimulus and makes some kind of sense of it. The metaphor is visual, but this may apply to any sense or conception. Borrowed loosely from Langacker."@en ;
+    rdfs:seeAlso <https://www.worldcat.org/title/foundations-of-cognitive-grammar-vol-1-theoretical-prerequisites/oclc/41504338> ;
+    rdfs:seeAlso <https://www.worldcat.org/title/41452700> ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:byObserver a owl:ObjectProperty;
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:label "by observer"@en;
+    rdfs:domain :Observation;
+    rdfs:range :ObservingAgent ;
+    dc:description "Asserts the (possibly fictional) experiencer of some observation. When unspecified, this may be presumed to be the all-knowing diety of your choice, or a participant in the observation shared between the author of the operative graph and anyone who embraces the contents of that graph."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:observerOf
+    rdfs:subPropertyOf :participantIn ;
+    owl:inverseOf :byObserver ;
+    dc:description "Asserts the observer of some observation." ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:fromStimulus a rdf:Property;
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:label "from stimulus"@en;
+    rdfs:domain :Observation;
+    # rdfs:range rdf:Resource;
+    dc:description "Asserts something external to the observer which is being scanned."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:withImpression a owl:ObjectProperty;
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:label "with impression"@en;
+    rdfs:domain :Observation;
+    # rdfs:range owl:Thing;
+    dc:description "Asserts some observer-internal representation of an external stimulus.  Impressions are typically not accessible in natural persons, though a functional MRI might be considered a model of an impression."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:ofPrimaryFigure a owl:ObjectProperty;
+    rdfs:label "of primary figure"@en;
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:domain :Observation;
+    rdfs:range :Entity ;
+    dc:description "Asserts the primary figure or 'trajector' of some observation."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:primaryFigureOf a owl:ObjectProperty;
+    rdfs:subPropertyOf :participantIn ;
+    owl:inverseOf :ofPrimaryFigure ;
+    rdfs:label "primary figure of" ;
+    dc:description "Asserts the observation of which something is the primary figure or 'trajector'." ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+
+:withSecondaryFigure a owl:ObjectProperty;
+    rdfs:label "with secondary figure"@en;
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:domain :Observation;
+    rdfs:range :Entity;
+    dc:description "Asserts a 'landmark' qualifying or contextualizing the trajector in some way."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:secondaryFigureOf a owl:ObjectProperty;
+    rdfs:subPropertyOf :participantIn ;
+    owl:inverseOf :withSecondaryFigure ;
+    rdfs:label "secondary figure of" ;
+    dc:description "Asserts the observation of which something is the secondary figure or landmark."
+.
+
+:withGround a owl:ObjectProperty;
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:label "with ground"@en;
+    rdfs:domain :Observation;
+    dc:description "Asserts a part or aspect of the impression complementary to the primary and secondary figures."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:withScope a rdf:Property;
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:label "with scope"@en;
+    skos:altLabel "with respect to"@en ;
+    rdfs:domain :Observation;
+    rdfs:range :AbstractRegion;
+    dc:description "Asserts the immediate scope within which some primary figure is assessed. Typically a sub-region of the ground."@en;
+.
+
+:assessedAs a rdf:Property;
+    rdfs:subPropertyOf :hasParticipant ;
+    rdfs:label "located at"@en;
+    rdfs:domain :Observation;
+    rdfs:range :AbstractRegion;
+    dc:description "Asserts an abstract region or point at which some observation has located the primary figure."@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:qualifiedAs a owl:ObjectProperty;
+    rdfs:subPropertyOf :assessedAs ;
+    rdfs:label "qualified as"@en;
+    rdfs:domain :Observation;
+    rdfs:range :Quality;
+    dc:description "Asserts the quality attributed to the primary figure by the observer in some Scan"@en;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+:quantifiedAs a owl:ObjectProperty;
+    rdfs:subPropertyOf :assessedAs ;
+    rdfs:label "quantified as"@en;
+    rdfs:domain :Observation;
+    rdfs:range :Magnitude;
+    dc:description "Asserts a quantity attributed to the primary figure by the observer in some observation."@en;
+.
+
+# :hasQuantity a owl:ObjectProperty ;
+#     rdfs:domain :Magnitude ;
+#     rdfs:range :Quantity ;
+#     owl:propertyChainAxiom (:primaryFigureOf :quantifiedAs) ;
+#     dc:description "X hasQuantity Y := X is the magnitude serving as the primary figure of a scan quantified as the number Y" ;
+# .
+
+## RELATONSHIP / STATE
+:State a rdfs:Class;
+    rdfs:label "state"@en;
+    rdfs:subClassOf :Relationship ;
+    dc:description "A (typcially bounded) relationship construed as an integral whole."@en ;
+    rdfs:comment "Consider using 'is' + past participle of a verb when naming." ;
+    rdfs:isDefinedBy ont:Top ;
+.
+
+## SHACL SUPPORT
+
+ont:Top
+    rdfs:comment """SHACL:
+Validation -- and Inferencing beyond OWL 1-- is supported with SHACL. There are prefixes declared for all the usual suspects, plus a namespace for 'inference' and 'validation' to hold node shapes definitions for those respective purposes.
+""" ;
+    sh:declare [
+        sh:prefix "natlex" ;
+        sh:namespace "http://rdf.naturallexicon.org/terms#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "dc" ;
+        sh:namespace "http://purl.org/dc/elements/1.1/"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "foaf" ;
+        sh:namespace "http://xmlns.com/foaf/0.1/"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "inference" ;
+        sh:namespace "http://rdf.naturallexicon.org/inference#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "natlex" ;
+        sh:namespace "http://rdf.naturallexicon.org/terms#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "ont" ;
+        sh:namespace "http://rdf.naturallexicon.org/ontology#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "owl" ;
+        sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "rdf" ;
+        sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "rdfs" ;
+        sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "schema" ;
+        sh:namespace "http://schema.org/"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "sh" ;
+        sh:namespace "http://www.w3.org/ns/shacl#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "skos" ;
+        sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "validation" ;
+        sh:namespace "http://rdf.naturallexicon.org/validation#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "vcard" ;
+        sh:namespace "http://www.w3.org/2006/vcard/ns#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "wd" ;
+        sh:namespace "http://www.wikidata.org/entity/"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "xsd" ;
+        sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ;
+    ] ;
+
+.

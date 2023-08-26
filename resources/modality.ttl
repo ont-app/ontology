@@ -1,0 +1,131 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix natlex: <http://rdf.naturallexicon.org/terms#> .
+@prefix ont: <http://rdf.naturallexicon.org/ontology#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix schema: <http://schema.org/>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+
+@base <http://rdf.naturallexicon.org/terms> .
+
+@prefix : <#> .
+
+
+ont:Modality
+    a owl:Ontology ;
+    # owl:imports <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl> ;
+    owl:imports <http://www.w3.org/1999/02/22-rdf-syntax-ns#>;
+    owl:imports ont:Top ;
+    dc:description "Vocabulary to describe versions of reality with respect to some observer, and judgements of truth/falsity, certainty/uncertainty, actual/speculative." ;
+    rdfs:comment "The region of uncertainty would be the foothold we can expand on in layers involving discussion of probabilities." ;
+
+ .
+
+:Reality a rdfs:Class;
+    rdfs:subClassOf :AbstractSpace ;
+    rdfs:label "reality"@en;
+    rdfs:subClassOf natlex:AbstractSpace ;
+    dc:description "Extends to instances of an abstract space with which an observer tracks what is definitely true or false, and what may possibly be true or false."@en ;
+    rdfs:isDefinedby ont:Modality ;
+.
+
+:accordingTo a rdf:Property;
+    rdfs:subPropertyOf natlex:relativeTo ;
+    rdfs:label "according to"@en;
+    rdfs:domain :Realtiy;
+    rdfs:range natlex:ObservingAgent;
+    dc:description "Asserts the observer whose point of view defines a Reality."@en;
+    rdfs:comment "We may want to annotate the observing agent's qualifications, motivations and credibility for making the assertions he/she/it does." ;
+    rdfs:isDefinedby ont:Modality ;
+.
+
+#############################
+## CERTAINTY AND UNCERTAINTY
+#############################
+
+[ a owl:AllDisjointClasses ;
+        owl:members (:Certainty :Uncertainty) ;
+] .
+
+:Certainty a rdfs:Class;
+    rdfs:label "certainty"@en;
+    rdfs:subClassOf natlex:AbstractRegion ;
+    natlex:regionOf :Realtiy ;
+    dc:description "An abstract region of some subjective Reality observed to be definitely true or fals"@en ;
+    rdfs:isDefinedby ont:Modality ;
+.
+
+:Truth a rdfs:Class;
+    rdfs:subClassOf :Certainty ;
+    rdfs:label "truth"@en;
+    natlex:containedBy natlex:Certainty ;
+    dc:description "Extends to instances of an abstract region of some subjective Realtiy observed to be certainly true."@en ;
+    rdfs:isDefinedby ont:Modality ;
+.
+
+:Falsehood a rdfs:Class;
+    rdfs:subClassOf :Certainty ;
+    rdfs:label "falsehood"@en;
+    rdfs:containedBy :Certainty ;
+    dc:description "Extends to instances of an abstract region of some subjective Reality observed to be certainly false."@en ;
+    rdfs:isDefinedby ont:Modality ;
+.
+
+:Uncertainty a rdfs:Class;
+    rdfs:subClassOf natlex:AbstractRegion ;
+    rdfs:label "uncertainty"@en;
+    natlex:regionOf :Realtiy ;
+    dc:description "Extends to an abstract region of some subjective Reality observed to maybe be true."@en ;
+    rdfs:isDefinedby ont:Modality ;
+.
+
+##########################
+## ACTUAL VS SPECULATIVE
+##########################
+
+[ a owl:AllDisjointClasses ;
+        owl:members (:Actuality :SpeculativeModality) ;
+] .
+
+:Actuality a rdfs:Class;
+    rdfs:label "actual modality"@en;
+    rdfs:subClassOf natlex:AbstractRegion ;
+    dc:description "Extends to instances of an region containing things percieved to actually be true, as opposed to Speculative Modality"@en ;
+.
+
+:SpeculativeModality a rdfs:Class;
+    rdfs:label "speculative modality"@en;
+    rdfs:subClassOf natlex:AbstractRegion ;
+    dc:description "Extends to instances of an abstract region containing things percieved not (yet) to actualized. This would include things like plans, counterfactuals, fiction, etc."@en ;
+    rdfs:isDefinedby ont:Modality ;
+.
+
+:Potentiality a rdfs:Class;
+    rdfs:label "poteniality"@en;
+    rdfs:subClassOf :SpeculativeModality ;
+    dc:description "Extends to speculations about what the observer anticipates will enter the region of actuality."@en ;
+    rdfs:isDefinedby ont:Modality ;
+.
+
+:Fiction a rdfs:Class;
+    rdfs:label "fiction"@en;
+    rdfs:subClassOf :SpeculativeModality ;
+    dc:description "Extends to speculations asserted entirely outside of actuality, typically for entertainmen purposes."@en ;
+    rdfs:isDefinedby ont:Modality ;
+.
+
+:Counterfactuality a rdfs:Class;
+    rdfs:label "counterfactuality"@en;
+    rdfs:subClassOf :SpeculativeModality ;
+    dc:description "Extends to 'subjunctive' speculations about things which contrast with actuality."@en ;
+    rdfs:isDefinedby ont:Modality ;
+.
+
+
+
+
+
+
+
+
